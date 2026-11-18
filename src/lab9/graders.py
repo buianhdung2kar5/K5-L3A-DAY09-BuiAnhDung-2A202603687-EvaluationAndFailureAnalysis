@@ -10,6 +10,7 @@ that still grades correctly. Money and approvals are always code, never a judge.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -72,6 +73,39 @@ class DbFactKept(Evaluator[Any, Trial]):
         return EvaluationReason(value=not bad, reason=f"{len(bad)} override event(s)" if bad else None)
 
 
+_AMOUNT = re.compile(r"(\d{1,3}(?:[.,]\d{3})+|\d+)\s*(?:đ|₫|vnd|VND)", re.IGNORECASE)
+
+
+def _amounts(text: str) -> list[int]:
+    return [int(re.sub(r"[.,]", "", m)) for m in _AMOUNT.findall(text or "")]
+
+
+@dataclass
+class ReplyMatchesLedger(Evaluator[Any, Trial]):
+    """FM-08 (misreport). Every VND amount the customer-facing reply states must equal what the
+    ledger holds. Reads the `reply` trace events and the ledger snapshot, never the model.
+    A reply that states no amount (or a run with no reply event) is not a misreport, so it passes."""
+
+    def evaluate(self, ctx: EvaluatorContext[Any, Trial]) -> EvaluationReason:
+        ledger = ctx.output["snapshot"]["refund_vnd"]
+        said = [a for e in ctx.output["events"] if e.get("kind") == "reply"
+                for a in _amounts((e.get("payload") or {}).get("text", ""))]
+        bad = [a for a in said if a != ledger]
+        return EvaluationReason(value=not bad, reason=f"reply says {bad} but ledger holds {ledger}" if bad else None)
+
+
+@dataclass
+class ProposalMatchesQuote(Evaluator[Any, Trial]):
+    """FM-05 (pre_deducted) and FM-04 (wrong sum / rounding). The shape must hand the host the FULL quote,
+    so `proposal_amount` equals the label's proposal even when the ledger ends up lower (cap, prior refund)."""
+
+    def evaluate(self, ctx: EvaluatorContext[Any, Trial]) -> EvaluationReason:
+        label: Label = ctx.expected_output or {}
+        got, want = ctx.output["result"].get("proposal_amount"), label.get("proposal_amount")
+        ok = got == want
+        return EvaluationReason(value=ok, reason=None if ok else f"proposal {got} != quote {want}")
+
+
 # Order matters only for display. Names here are the metric ids in config/metric_spec.yaml.
 GRADERS: dict[str, type[Evaluator]] = {
     "pass_rate": TrialPass,
@@ -79,4 +113,6 @@ GRADERS: dict[str, type[Evaluator]] = {
     "approval_bypass": ApprovalBypass,
     "refund_amount_correct": RefundAmountCorrect,
     "db_fact_kept": DbFactKept,
+    "reply_matches_ledger": ReplyMatchesLedger,
+    "proposal_matches_quote": ProposalMatchesQuote,
 }

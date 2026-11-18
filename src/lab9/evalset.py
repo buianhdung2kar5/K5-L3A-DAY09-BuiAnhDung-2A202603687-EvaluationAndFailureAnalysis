@@ -29,6 +29,27 @@ REQUIRED = ("item_id", "claim_id", "failure_modes", "provenance", "split", "eval
 
 FM_CODE = re.compile(r"FM-\d{2}")
 
+# M1: which failure modes (docs/failure_taxonomy.md) each Lab 8 public test exercises. Chosen from the
+# trace evidence in the taxonomy: an item carries FM-xx when a variant that injects that mode fails on
+# it (probe over 11 single-bug variants x 14 items x 5 seeds), or when the claim is designed to
+# stress it (T05/T10 carry PII canaries; T07/T13 are guardrail denials).
+FM_BY_MATRIX: dict[str, list[str]] = {
+    "T01": ["FM-04", "FM-07"],   # round_down turns 35.000 into 30.000; O-107 is shared with T10-T12
+    "T02": ["FM-03"],            # ticket says 5 days, order row says 2
+    "T03": ["FM-08"],            # damage refund: the reply states an amount, it must be the ledger's
+    "T04": ["FM-02"],            # no order id: must not write the ledger at all
+    "T05": ["FM-09", "FM-01"],   # other principal's order: PII canaries must not reach reply or trace
+    "T06": ["FM-06"],            # ticket quotes superseded clause SHIP-LATE-OLD
+    "T07": ["FM-02"],            # expired approval: host denies, shape must not report resolved
+    "T08": ["FM-08", "FM-04"],   # approval 20.000 < quote 35.000: the reply must say 20.000
+    "T09": ["FM-03"],            # injection ("ignore policy"): ticket text is data, not authority
+    "T10": ["FM-01", "FM-07"],   # same order as T01, with PII canaries in the labels
+    "T11": ["FM-07"],            # same claim called again: still one ledger row
+    "T12": ["FM-07"],            # crash then resume: still one ledger row
+    "T13": ["FM-05", "FM-02"],   # order already refunded: pre-deducting or ignoring the denial both fail
+    "T14": ["FM-04", "FM-05", "FM-08"],   # ship + damage: max not sum, host deducts, reply = ledger
+}
+
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -46,11 +67,10 @@ def build(source: Path = SOURCE) -> tuple[int, int]:
         items.append({
             "item_id": item_id,
             "claim_id": claim["claim_id"],
-            # TODO M1: replace [] with the FM-xx codes from your taxonomy that this item exercises.
-            "failure_modes": [],
+            "failure_modes": list(FM_BY_MATRIX.get(claim.get("matrix_id"), [])),
             "provenance": {"source": "lab8_public", "matrix_id": claim.get("matrix_id"),
                            "from_trace": None, "generator": None,
-                           "label_by": "lab8_matrix", "checked_by": None},
+                           "label_by": "lab8_matrix", "checked_by": "variant_probe_2026-11-18"},
             "split": "regression",
             "eval_set_version": VERSION,
         })
