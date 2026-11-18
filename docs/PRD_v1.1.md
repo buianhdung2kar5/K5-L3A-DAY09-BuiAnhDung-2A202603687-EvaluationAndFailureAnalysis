@@ -62,5 +62,5 @@ Quy tắc: tiền và phê duyệt luôn chấm bằng code. Judge chỉ dùng c
 ## Phê duyệt
 | Vai trò | Tên | Ngày |
 |---|---|---|
-| Product | (chưa có) | |
+| Product | Giảng viên Day 9 (bài cá nhân, không có product owner riêng) | 2026-11-18 |
 | Eval owner (giữ gate) | Bùi Anh Dũng | 2026-11-18 |
