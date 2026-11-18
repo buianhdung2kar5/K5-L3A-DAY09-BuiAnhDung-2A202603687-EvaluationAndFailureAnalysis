@@ -51,6 +51,13 @@ FM_BY_MATRIX: dict[str, list[str]] = {
 }
 
 
+def write_lf(path: Path, text: str) -> None:
+    """Write with LF line endings. Path.write_text on Windows would store CRLF, and git stores LF, so the
+    eval-set sha (a hash of the file bytes) would differ between this machine and the CI."""
+    with path.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
+
+
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
@@ -76,8 +83,8 @@ def build(source: Path = SOURCE) -> tuple[int, int]:
         })
         labels[claim["claim_id"]] = claim["expected"]
     ITEMS.parent.mkdir(parents=True, exist_ok=True)
-    ITEMS.write_text("".join(json.dumps(i, ensure_ascii=False) + "\n" for i in items), encoding="utf-8")
-    LABELS.write_text(json.dumps(labels, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_lf(ITEMS, "".join(json.dumps(i, ensure_ascii=False) + "\n" for i in items))
+    write_lf(LABELS, json.dumps(labels, ensure_ascii=False, indent=2))
     return len(items), len(labels)
 
 
@@ -118,8 +125,8 @@ def build_v2(items_v1: Path = ITEMS, labels_v1: Path = LABELS, pack: Path = PACK
             "slices": slices_for(claim["expected"], True),
         })
         labels[claim["claim_id"]] = claim["expected"]
-    ITEMS_V2.write_text("".join(json.dumps(i, ensure_ascii=False) + "\n" for i in items), encoding="utf-8")
-    LABELS_V2.write_text(json.dumps(labels, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_lf(ITEMS_V2, "".join(json.dumps(i, ensure_ascii=False) + "\n" for i in items))
+    write_lf(LABELS_V2, json.dumps(labels, ensure_ascii=False, indent=2))
     return len(items), len(labels)
 
 

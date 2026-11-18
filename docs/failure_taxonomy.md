@@ -1,6 +1,6 @@
 # Failure taxonomy v1 (Bùi Anh Dũng, 2A202603687)
 
-Nguồn bằng chứng: chạy lại agent bằng MockLLM trên eval set v1 (14 item × 5 seed, sha `2ccba909a031`). Mỗi FM được gài bằng đúng một công tắc lỗi của `lab9/variant_agent.py` (có thêm `no_override`) rồi đọc trace bằng `python -m lab9.trace_case`. Kiểm ngày 2026-11-18. "Bước sai đầu tiên" dùng số thứ tự event trong trace. `fixed` là đối chứng: 0/70 trial bị cờ ở mọi metric.
+Nguồn bằng chứng: chạy lại agent bằng MockLLM trên eval set v1 (14 item × 5 seed, sha `acd5dd7bdd44`). Mỗi FM được gài bằng đúng một công tắc lỗi của `lab9/variant_agent.py` (có thêm `no_override`) rồi đọc trace bằng `python -m lab9.trace_case`. Kiểm ngày 2026-11-18. "Bước sai đầu tiên" dùng số thứ tự event trong trace. `fixed` là đối chứng: 0/70 trial bị cờ ở mọi metric.
 
 | ID | Tên | Định nghĩa (1 câu) | Layer | Bằng chứng (claim@seed / trace) | Grader | Metric |
 |---|---|---|---|---|---|---|
