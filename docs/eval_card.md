@@ -2,8 +2,8 @@
 
 Card này đi kèm mỗi báo cáo và được dùng lại ở Day 10. Số liệu lấy từ report do script sinh ra (`src/reports/`), kiểm 2026-11-18.
 
-- **Run ID / eval set SHA:** baseline `E-swarm-20261118-2ccb`, `E-fixed-20261118-2ccb`, `E-seeded_regression-20261118-2ccb`; eval set v1 sha `2ccba909a031`.
-- **Phiên bản:** code = `src/` của repo gốc Day 8 (không sửa `lab8/`) + `lab9` ở nhánh `starter/d09` · eval set v1 (sha `2ccba909a031`) · metric_spec_version 1.0 · grader: `lab9.graders` (ApprovalBypass, RefundAmountCorrect, ReplyMatchesLedger do tôi viết) · seeds 11/22/33/44/55 · MockLLM · Python 3.12.
+- **Run ID / eval set SHA:** baseline `E-swarm-20261118-acd5`, `E-fixed-20261118-acd5`, `E-seeded_regression-20261118-acd5`; eval set v1 sha `acd5dd7bdd44`.
+- **Phiên bản:** code = `src/` của repo gốc Day 8 (không sửa `lab8/`) + `lab9` ở nhánh `starter/d09` · eval set v1 (sha `acd5dd7bdd44`) · metric_spec_version 1.0 · grader: `lab9.graders` (ApprovalBypass, RefundAmountCorrect, ReplyMatchesLedger do tôi viết) · seeds 11/22/33/44/55 · MockLLM · Python 3.12.
 - **Eval set:** v1, 14 item × 5 seed = 70 trial, nguồn `lab8_public`; nhãn tách riêng trong `labels_v1.json`. Mỗi item gắn 1–3 mã FM (`FM_BY_MATRIX`, `lab9/evalset.py`), `evalset --check` = 0 problem.
 - **Metric & ngưỡng (`config/metric_spec.yaml`):**
 
@@ -47,7 +47,7 @@ Baseline `swarm` fail đúng một item: E-002@55 (FM-03, swarm tin ticket ở s
 
 ## Mục v2 (Advanced/Expert): eval set v2, slice, pass^k, chống gian lận eval
 
-- **Eval set v2:** sha `a7f9e495c279`, 28 item × 5 seed = 140 trial = 14 item v1 + 14 claim đối kháng (`adversarial_v2.json`). `evalset --v2` = 0 problem, mỗi FM bị tấn công có ≥3 item (`config/fm_map.yaml`). Baseline: `E-swarm-20261118-a7f9`.
+- **Eval set v2:** sha `36307f081caf`, 28 item × 5 seed = 140 trial = 14 item v1 + 14 claim đối kháng (`adversarial_v2.json`). `evalset --v2` = 0 problem, mỗi FM bị tấn công có ≥3 item (`config/fm_map.yaml`). Baseline: `E-swarm-20261118-3630`.
 - **Ngưỡng chọn từ A/A.** `lab9.mutation --aa 66,77,88,99,110` cho Δ = 0.0000 ở mọi metric, vì MockLLM tất định: cả hai bộ seed đều có đúng một seed chia hết cho 5 (55 và 110) nên `swarm` hỏng đúng một seed ở mỗi bộ. Với LLM thật, dải nhiễu A/A lớn hơn 0 (sampling), nên sàn phải nằm ngoài dải đó. Vì dải đo được là 0, tôi đặt mọi sàn *dưới baseline một biên có chủ ý*, không đặt sát:
 
 | Ngưỡng | Baseline `swarm` v2 | Sàn | Biên | Lý do |

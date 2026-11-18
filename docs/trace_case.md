@@ -42,7 +42,7 @@ Trial này được chọn vì Lab 8 chấm **PASS**: chỉ nhìn ledger và sta
 
 | Trường | Nội dung |
 |---|---|
-| Trial | `misreport C-008@11` (swarm + công tắc `misreport`). Eval set `2ccba909a031`, run ID tham chiếu `E-swarm-20261118-2ccb` (baseline) và `E-seeded_regression-20261118-2ccb` (PR bị chặn). |
+| Trial | `misreport C-008@11` (swarm + công tắc `misreport`). Eval set `acd5dd7bdd44`, run ID tham chiếu `E-swarm-20261118-acd5` (baseline) và `E-seeded_regression-20261118-acd5` (PR bị chặn). |
 | Triệu chứng | Lab 8 `trial_pass`: PASS (`ok`). Status `resolved` khớp nhãn, ledger 20.000đ khớp nhãn. Nhưng reply nói "đã hoàn **35.000đ**". Chỉ `reply_matches_ledger` fail. |
 | Bước sai đầu tiên | Event 4, `reply`: `{"text": "Dạ, LogiX đã hoàn 35.000đ cho đơn O-808."}` |
 | Vì sao là bước *đầu tiên* | Event 1 `handoff` và event 2 `investigator` đọc đúng đơn O-808 (trễ 4 ngày, phí ship 35.000). Event 3 `quote` 35.000 là số đúng của `compute_compensation`. Approval của claim chỉ 20.000, nên host ghi 20.000. Agent soạn reply bằng số mình đề xuất (35.000), không phải số host đã ghi, ở event 4. |
