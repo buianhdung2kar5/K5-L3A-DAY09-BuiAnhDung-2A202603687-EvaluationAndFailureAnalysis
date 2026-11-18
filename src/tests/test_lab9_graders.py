@@ -48,3 +48,32 @@ def test_wrong_amount_in_ledger(graders):
 
 def test_override_event_breaks_db_fact(graders):
     assert graders.DbFactKept().evaluate(ctx(trial(events=[{"kind": "model_override", "payload": {}}]))).value is False
+
+
+def _reply(text):
+    return {"kind": "reply", "payload": {"text": text}}
+
+
+def test_reply_matches_ledger(graders):
+    ok = trial(events=[_reply("Dạ, LogiX đã hoàn 35.000đ cho đơn O-107.")])
+    assert graders.ReplyMatchesLedger().evaluate(ctx(ok)).value is True
+
+
+def test_reply_misreport_is_caught(graders):
+    bad = trial(refund_vnd=20000, events=[_reply("Dạ, LogiX đã hoàn 35.000đ cho đơn O-808.")])
+    assert graders.ReplyMatchesLedger().evaluate(ctx(bad)).value is False
+
+
+def test_reply_without_amount_or_event_is_not_misreport(graders):
+    assert graders.ReplyMatchesLedger().evaluate(ctx(trial(events=[_reply("Dạ, đã chuyển chuyên viên.")]))).value is True
+    assert graders.ReplyMatchesLedger().evaluate(ctx(trial())).value is True
+
+
+def test_proposal_matches_quote(graders):
+    label = {**LABEL, "proposal_amount": 35000}
+    ok = trial()
+    ok["result"] = {"proposal_amount": 35000}
+    assert graders.ProposalMatchesQuote().evaluate(ctx(ok, label)).value is True
+    pre = trial(refund_vnd=0, refund_count=0)
+    pre["result"] = {"proposal_amount": 0}               # pre-deducted: the shape never passed the full quote
+    assert graders.ProposalMatchesQuote().evaluate(ctx(pre, label)).value is False
